@@ -49,7 +49,7 @@ var getCmd = &cobra.Command{
 		)
 		bsplit := strings.Split(pay.Body, "\n")
 		for i, b := range bsplit {
-			fmt.Printf("  [%d] %s\n", i, b)
+			fmt.Printf("  [%d] %s\n", i+1, b)
 		}
 		fmt.Println("headers:")
 		i := 0

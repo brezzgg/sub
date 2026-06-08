@@ -1,0 +1,46 @@
+# id is the subscription identifier and must contain only URI-safe characters.
+# For regular subscriptions, the id must be exactly 128 characters long.
+# For file-based subscriptions, the id may be of any length.
+# To generate a valid id, use the following command:
+#   sub cli rand_id
+#id: QV9CoPHJIraJxYxNQvg8rX2AedgQxlMBewMuQfqwzWtltKDwefALssjo19sKR-f80BbBEe4gKr7UUA_v87Od3vMnN3F8L2-B4YvPKkgwMXkYwYGi59GK_WW1deTzx_SE
+id: my_best_subscription
+
+# title is the subscription name displayed in the client application.
+title: Example title
+
+# update_interval specifies how often (in hours) the client should
+# refresh the subscription.
+update_interval: 6
+
+# user_web_page is the URI of the user profile page.
+user_web_page: https://example.com/user/some_user_id
+
+# moved_permanently is the URI indicating that the subscription
+# has been permanently moved to a new location.
+moved_permanently: https://example2.com/sub/other_id
+
+# support_uri is the URI of the support chat or a mailto address.
+support_uri: mailto:user@example.com
+
+# preferred_dns is the DNS server that the client should use
+# for its requests.
+preferred_dns: 8.8.8.8
+
+# custom_headers is a custom map of headers that returns in
+# subscirption response.
+custom_headers:
+  # header1: value1
+  # header2: value2
+
+# ttl is a subscription time to live (in seconds).
+# zero is unlimited subscription and 86400 is hours to live.
+ttl: 0
+
+# bodies is an array of subscription entries containing
+# protocol-specific and user-specific settings.
+bodies:
+  - |
+    vless://some_user_uuid@some_ip:some_port?some_flag=some_flag_value...
+  - |
+    hysteria2://some_user%some_user_uuid@some_ip:some_port?flags...

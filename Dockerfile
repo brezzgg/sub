@@ -15,4 +15,4 @@ FROM alpine:3.23.4
 WORKDIR /workspace
 
 COPY --from=builder /bin/sub /bin/sub
-CMD ["sub", "run", "--repo=sqlite", "--repo-file=/workspace/database.db"]
+CMD ["sub", "run", "--storage=badger", "--storage-file=/workspace/database"]

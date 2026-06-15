@@ -1,0 +1,31 @@
+syntax = "proto3";
+package sub.internal.usecase;
+
+option go_package = "github.com/brezzgg/sub/internal/usecase";
+
+message SubscriptionRawPb {
+    string id = 1;
+    string payload_body_string = 2;
+    map<string, string> payload_headers = 3;
+    int64 expired = 4;
+    bool disabled = 5;
+    MetadataRaw metadata = 6;
+}
+
+message SetRequest {
+    SubscriptionRawPb raw = 1;
+    repeated string bodies = 2;
+
+    string title = 3;
+    string update_interval = 4;
+    string user_web_page = 5;
+    string moved_permanently = 6;
+    string support_uri = 7;
+    string dns = 8;
+
+    map<string, string> custom_headers = 10;
+}
+
+message MetadataRaw {
+    bytes data = 1;
+}

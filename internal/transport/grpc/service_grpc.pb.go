@@ -2,12 +2,13 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v4.25.1
-// source: internal/transport/grpc/pb/service.proto
+// source: internal/transport/grpc/service.proto
 
-package pb
+package grpc
 
 import (
 	context "context"
+	usecase "github.com/brezzgg/sub/internal/usecase"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,9 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SubService_Set_FullMethodName    = "/sub.internal.grpc.pb.SubService/Set"
-	SubService_Get_FullMethodName    = "/sub.internal.grpc.pb.SubService/Get"
-	SubService_GetAll_FullMethodName = "/sub.internal.grpc.pb.SubService/GetAll"
+	SubService_Set_FullMethodName        = "/sub.internal.grpc.SubService/Set"
+	SubService_Get_FullMethodName        = "/sub.internal.grpc.SubService/Get"
+	SubService_GetAll_FullMethodName     = "/sub.internal.grpc.SubService/GetAll"
+	SubService_Remove_FullMethodName     = "/sub.internal.grpc.SubService/Remove"
+	SubService_SetEnabled_FullMethodName = "/sub.internal.grpc.SubService/SetEnabled"
 )
 
 // SubServiceClient is the client API for SubService service.
@@ -29,8 +32,10 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SubServiceClient interface {
 	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*Empty, error)
-	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
+	Get(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*usecase.SubscriptionRawPb, error)
 	GetAll(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetAllResponse, error)
+	Remove(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*Empty, error)
+	SetEnabled(ctx context.Context, in *SetEnabledRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type subServiceClient struct {
@@ -51,9 +56,9 @@ func (c *subServiceClient) Set(ctx context.Context, in *SetRequest, opts ...grpc
 	return out, nil
 }
 
-func (c *subServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
+func (c *subServiceClient) Get(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*usecase.SubscriptionRawPb, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetResponse)
+	out := new(usecase.SubscriptionRawPb)
 	err := c.cc.Invoke(ctx, SubService_Get_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -71,13 +76,35 @@ func (c *subServiceClient) GetAll(ctx context.Context, in *Empty, opts ...grpc.C
 	return out, nil
 }
 
+func (c *subServiceClient) Remove(ctx context.Context, in *IdRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, SubService_Remove_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *subServiceClient) SetEnabled(ctx context.Context, in *SetEnabledRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, SubService_SetEnabled_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SubServiceServer is the server API for SubService service.
 // All implementations must embed UnimplementedSubServiceServer
 // for forward compatibility.
 type SubServiceServer interface {
 	Set(context.Context, *SetRequest) (*Empty, error)
-	Get(context.Context, *GetRequest) (*GetResponse, error)
+	Get(context.Context, *IdRequest) (*usecase.SubscriptionRawPb, error)
 	GetAll(context.Context, *Empty) (*GetAllResponse, error)
+	Remove(context.Context, *IdRequest) (*Empty, error)
+	SetEnabled(context.Context, *SetEnabledRequest) (*Empty, error)
 	mustEmbedUnimplementedSubServiceServer()
 }
 
@@ -91,11 +118,17 @@ type UnimplementedSubServiceServer struct{}
 func (UnimplementedSubServiceServer) Set(context.Context, *SetRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (UnimplementedSubServiceServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
+func (UnimplementedSubServiceServer) Get(context.Context, *IdRequest) (*usecase.SubscriptionRawPb, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedSubServiceServer) GetAll(context.Context, *Empty) (*GetAllResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAll not implemented")
+}
+func (UnimplementedSubServiceServer) Remove(context.Context, *IdRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Remove not implemented")
+}
+func (UnimplementedSubServiceServer) SetEnabled(context.Context, *SetEnabledRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetEnabled not implemented")
 }
 func (UnimplementedSubServiceServer) mustEmbedUnimplementedSubServiceServer() {}
 func (UnimplementedSubServiceServer) testEmbeddedByValue()                    {}
@@ -137,7 +170,7 @@ func _SubService_Set_Handler(srv interface{}, ctx context.Context, dec func(inte
 }
 
 func _SubService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRequest)
+	in := new(IdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -149,7 +182,7 @@ func _SubService_Get_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: SubService_Get_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubServiceServer).Get(ctx, req.(*GetRequest))
+		return srv.(SubServiceServer).Get(ctx, req.(*IdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -172,11 +205,47 @@ func _SubService_GetAll_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SubService_Remove_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SubServiceServer).Remove(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SubService_Remove_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SubServiceServer).Remove(ctx, req.(*IdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SubService_SetEnabled_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetEnabledRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SubServiceServer).SetEnabled(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SubService_SetEnabled_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SubServiceServer).SetEnabled(ctx, req.(*SetEnabledRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SubService_ServiceDesc is the grpc.ServiceDesc for SubService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var SubService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sub.internal.grpc.pb.SubService",
+	ServiceName: "sub.internal.grpc.SubService",
 	HandlerType: (*SubServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -191,7 +260,15 @@ var SubService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetAll",
 			Handler:    _SubService_GetAll_Handler,
 		},
+		{
+			MethodName: "Remove",
+			Handler:    _SubService_Remove_Handler,
+		},
+		{
+			MethodName: "SetEnabled",
+			Handler:    _SubService_SetEnabled_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/transport/grpc/pb/service.proto",
+	Metadata: "internal/transport/grpc/service.proto",
 }

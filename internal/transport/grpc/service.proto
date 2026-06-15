@@ -1,0 +1,36 @@
+syntax = "proto3";
+package sub.internal.grpc;
+
+option go_package = "github.com/brezzgg/sub/internal/grpc";
+
+import "internal/usecase/model.proto";
+
+service SubService {
+  rpc Set(SetRequest) returns (Empty);
+  rpc Get(IdRequest) returns (sub.internal.usecase.SubscriptionRawPb);
+  rpc GetAll(Empty) returns (GetAllResponse);
+  rpc Remove(IdRequest) returns (Empty);
+  rpc SetEnabled(SetEnabledRequest) returns (Empty);
+}
+
+message SetRequest {
+    oneof data {
+        sub.internal.usecase.SubscriptionRawPb raw = 1;
+        sub.internal.usecase.SetRequest req = 2;
+    }
+}
+
+message GetAllResponse {
+    repeated sub.internal.usecase.SubscriptionRawPb subs = 1;
+}
+
+message IdRequest {
+    string id = 1;
+}
+
+message SetEnabledRequest {
+    IdRequest id = 1;
+    bool enabled = 2;
+}
+
+message Empty {}

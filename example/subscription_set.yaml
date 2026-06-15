@@ -4,7 +4,10 @@
 # To generate a valid id, use the following command:
 #   sub cli rand_id
 #id: QV9CoPHJIraJxYxNQvg8rX2AedgQxlMBewMuQfqwzWtltKDwefALssjo19sKR-f80BbBEe4gKr7UUA_v87Od3vMnN3F8L2-B4YvPKkgwMXkYwYGi59GK_WW1deTzx_SE
-id: my_best_subscription
+id: my_new_subscription
+
+# enabled indicate is subscription enabled or not.
+enabled: true
 
 # title is the subscription name displayed in the client application.
 title: Example title

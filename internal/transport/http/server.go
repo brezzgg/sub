@@ -2,25 +2,24 @@ package http
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/brezzgg/go-packages/lg"
-	"github.com/brezzgg/sub/internal/models"
-	"github.com/brezzgg/sub/internal/models/payload/v1"
+	"github.com/brezzgg/sub/internal/pkg/errors"
+	"github.com/brezzgg/sub/internal/usecase"
 )
 
 type Handler struct {
-	repo    models.Repo
+	usec    *usecase.Usecase
 	host    string
 	srv     *http.Server
 	pattern string
 }
 
-func New(host string, repo models.Repo, handlePattern string) *Handler {
-	return &Handler{repo: repo, host: host, pattern: handlePattern}
+func New(usec *usecase.Usecase, host string, handlePattern string) *Handler {
+	return &Handler{usec: usec, host: host, pattern: handlePattern}
 }
 
 func (h *Handler) Run() error {
@@ -56,10 +55,9 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
 	// get sub
-	sub, err := h.repo.Get(id)
+	pl, err := h.usec.GetPayload(id)
 	if err != nil {
-		lg.Error("get", err)
-		if errors.Is(err, models.ErrNotFound) {
+		if errors.CodeIs(err, errors.CodeNotFound) {
 			w.WriteHeader(http.StatusNotFound)
 			_, _ = w.Write([]byte(err.Error()))
 			return
@@ -68,31 +66,13 @@ func (h *Handler) get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate sub
-	if !sub.Validate() {
-		lg.Error("get", models.ErrExpired)
-		_ = h.repo.Remove(id)
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(models.ErrExpired.Error()))
-		return
-	}
-
-	// unmarshal payload
-	pl, err := payload.Unmarshal(sub.Payload, false)
-	if err != nil {
-		lg.Error("failed to unmarshal payload", err)
-		_ = h.repo.Remove(id)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	// write headers
-	for k, v := range pl.GetHeaders() {
+	for k, v := range pl.Headers {
 		w.Header().Set(k, v)
 	}
 
 	// write body
-	_, err = w.Write([]byte(pl.GetBody()))
+	_, err = w.Write([]byte(pl.Body))
 	if err != nil {
 		lg.Error("get", lg.Ef("failed to write response: %s", err))
 		w.WriteHeader(http.StatusInternalServerError)

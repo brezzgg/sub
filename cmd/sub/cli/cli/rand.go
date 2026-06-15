@@ -2,17 +2,17 @@ package cli
 
 import (
 	"crypto/rand"
-	"fmt"
 	"math/big"
 
+	"github.com/brezzgg/sub/cmd/sub/cli/common/log"
 	"github.com/spf13/cobra"
 )
 
 var randidCmd = &cobra.Command{
 	Use:   "rand_id",
-	Short: "Generate random sub_id",
+	Short: "Generate random subscription id",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s", randIdFunc())
+		log.Print(randIdFunc())
 	},
 }
 

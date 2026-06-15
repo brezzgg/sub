@@ -1,10 +1,13 @@
 package cli
 
 import (
-	"github.com/brezzgg/go-packages/lg"
-	"github.com/brezzgg/sub/internal/transport/grpc"
+	"github.com/brezzgg/sub/cmd/sub/cli/common/errors"
+	"github.com/brezzgg/sub/cmd/sub/cli/common/log"
+	"github.com/brezzgg/sub/internal/manager"
 	"github.com/spf13/cobra"
 )
+
+var mgr *manager.Manager
 
 var CliCmd = &cobra.Command{
 	Use:   "cli",
@@ -12,11 +15,15 @@ var CliCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		remote, err := cmd.Flags().GetString(remoteFlag)
 		if err != nil {
-			lg.Fatal(err)
+			log.Fatal(errors.ErrInvalidArg(err).Error())
 		}
-		if _, err := grpc.GetClient(remote); err != nil {
-			lg.Fatal("failed to connect to remote", err)
+		m, err := manager.NewClientManager(
+			manager.WithGrpcClient(remote),
+		)
+		if err != nil {
+			log.Fatal(errors.ErrFailGrpcConn(err).Error())
 		}
+		mgr = m
 	},
 }
 
@@ -33,6 +40,9 @@ func init() {
 func addSubcommands() {
 	CliCmd.AddCommand(setCmd)
 	CliCmd.AddCommand(getCmd)
+	CliCmd.AddCommand(rmCmd)
 	CliCmd.AddCommand(randidCmd)
 	CliCmd.AddCommand(exampleSetCmd)
+	CliCmd.AddCommand(enableCmd)
+	CliCmd.AddCommand(disableCmd)
 }

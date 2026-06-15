@@ -1,28 +1,39 @@
 package run
 
 import (
-	"net"
 	"strings"
 
 	"github.com/brezzgg/go-packages/lg"
-	"github.com/brezzgg/sub/internal/models"
-	"github.com/brezzgg/sub/internal/repo/sqlite"
-	"github.com/brezzgg/sub/internal/transport/grpc"
-	"github.com/brezzgg/sub/internal/transport/grpc/pb"
-	"github.com/brezzgg/sub/internal/transport/http"
+	"github.com/brezzgg/sub/internal/manager"
+	"github.com/brezzgg/sub/internal/repo"
 	"github.com/spf13/cobra"
-	G "google.golang.org/grpc"
 )
 
 var RunCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Start sub server",
 	Run: func(cmd *cobra.Command, args []string) {
-		repof, err := cmd.Flags().GetString(repoFlag)
+		storageType, err := cmd.Flags().GetString(storageFlag)
 		if err != nil {
 			lg.Fatal(err)
 		}
-		repoFile, err := cmd.Flags().GetString(repoFileFlag)
+		storageFile, err := cmd.Flags().GetString(storageFileFlag)
+		if err != nil {
+			lg.Fatal(err)
+		}
+		storageRemote, err := cmd.Flags().GetString(storageRemoteFlag)
+		if err != nil {
+			lg.Fatal(err)
+		}
+		cacheType, err := cmd.Flags().GetString(cacheFlag)
+		if err != nil {
+			lg.Fatal(err)
+		}
+		cacheFile, err := cmd.Flags().GetString(storageFileFlag)
+		if err != nil {
+			lg.Fatal(err)
+		}
+		cacheRemote, err := cmd.Flags().GetString(storageRemoteFlag)
 		if err != nil {
 			lg.Fatal(err)
 		}
@@ -45,58 +56,51 @@ var RunCmd = &cobra.Command{
 		}
 
 		lg.Info("options", lg.C{
-			"repo":         repof,
-			"repo_file":    repoFile,
-			"host":         host,
-			"grpc_host":    grpcHost,
-			"http_pattern": httpPattern,
+			"storage_type":   storageType,
+			"storage_file":   storageFile,
+			"storage_remote": storageRemote,
+			"host":           host,
+			"grpc_host":      grpcHost,
+			"http_pattern":   httpPattern,
 		})
 
-		var repo models.Repo
-		switch repof {
-		case "sqlite":
-			r, err := sqlite.NewRepo(repoFile)
-			if err != nil {
-				lg.Fatal("failed to init repo", err)
-			}
-			repo = r
-		default:
-			lg.Fatal("unknown repository")
+		repoOpts := &repo.Options{
+			StorageProvider: storageType,
+			StorageOpts: map[string]any{
+				"file":   storageFile,
+				"remote": storageRemote,
+			},
+			CacheProvider: cacheType,
+			CacheOpts: map[string]any{
+				"file":   cacheFile,
+				"remote": cacheRemote,
+			},
 		}
-		lg.Info("repo load successful")
 
-		lis, err := net.Listen("tcp", grpcHost)
+		mgr, err := manager.NewManager(
+			repoOpts,
+			nil,
+			manager.WithGrpcService(grpcHost),
+			manager.WithHttpHandler(host, httpPattern),
+		)
 		if err != nil {
-			lg.Fatal("failed to listen", err, lg.C{"host": grpcHost})
+			lg.Fatal("manager init", err)
 		}
-		grpcserv := G.NewServer(G.UnaryInterceptor(grpc.LoggingInterceptor))
-		pb.RegisterSubServiceServer(grpcserv, grpc.NewServer(repo))
 
-		httpserv := http.New(host, repo, httpPattern)
-
-		sch := &scheduler{}
-
-		lg.Info("grpc server configured")
-		sch.Add(func() error {
-			return grpcserv.Serve(lis)
-		}, func() error {
-			grpcserv.GracefulStop()
-			return nil
-		})
-
-		lg.Info("http server configured")
-		sch.Add(httpserv.Run, httpserv.Stop)
-
-		if err := sch.Run(); err != nil {
-			lg.Error(err, lg.Sync{})
+		if err := mgr.Run(); err != nil {
+			lg.Fatal(err, lg.Sync{})
 		}
 	},
 }
 
 const (
 	hostFlag               = "host"
-	repoFlag               = "repo"
-	repoFileFlag           = "repo-file"
+	cacheFlag              = "cache"
+	cacheFileFlag          = "cache-file"
+	cacheRemoteFlag        = "cache-remote"
+	storageFlag            = "storage"
+	storageFileFlag        = "storage-file"
+	storageRemoteFlag      = "storage-remote"
 	grpcHostFlag           = "grpc-host"
 	httpPatternFlag        = "http-pattern"
 	httpPatternFlagDefault = "GET /i/{id}"
@@ -105,8 +109,12 @@ const (
 func init() {
 	RunCmd.PersistentFlags().StringP(hostFlag, "H", "0.0.0.0:8080", "select host")
 	RunCmd.PersistentFlags().String(grpcHostFlag, "0.0.0.0:50051", "select grpc host")
-	RunCmd.PersistentFlags().String(repoFlag, "sqlite", "select repository")
-	RunCmd.PersistentFlags().String(repoFileFlag, "./subs.db", "choose repository file if needed")
+	RunCmd.PersistentFlags().String(cacheFlag, "", "select cache")
+	RunCmd.PersistentFlags().String(cacheFileFlag, "", "select cache file/directory if needed")
+	RunCmd.PersistentFlags().String(cacheRemoteFlag, "", "select cache remote host if needed")
+	RunCmd.PersistentFlags().String(storageFlag, "", "select storage")
+	RunCmd.PersistentFlags().String(storageFileFlag, "", "select storage file/directory if needed")
+	RunCmd.PersistentFlags().String(storageRemoteFlag, "", "select storage remote host if needed")
 	RunCmd.PersistentFlags().String(
 		httpPatternFlag,
 		httpPatternFlagDefault,

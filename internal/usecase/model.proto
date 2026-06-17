@@ -22,10 +22,18 @@ message SetRequest {
     string moved_permanently = 6;
     string support_uri = 7;
     string dns = 8;
+    UserInfo user_info = 9;
 
     map<string, string> custom_headers = 10;
 }
 
 message MetadataRaw {
     bytes data = 1;
+}
+
+message UserInfo {
+    int64 upload = 1;
+    int64 download = 2;
+    int64 total = 3;
+    int64 expired = 4;
 }

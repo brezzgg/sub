@@ -9,6 +9,18 @@ id: my_new_subscription
 # enabled indicate is subscription enabled or not.
 enabled: true
 
+# expired is a subscription expire timestamp (in unix format).
+# zero is unlimited subscription and 86400 is hours to live.
+expired: 0
+
+# user_info is inforamtion about user subscription.
+user_info:
+  upload: 1048576 # byte (1048576 byte = 1 mb)
+  download: 1048576 # byte
+  total: 1073741824 # byte (1073741824 byte = 1 gb)
+  # if root expired field not null that field must be ignored.
+  expire: 1787900000 # unix timestamp
+
 # title is the subscription name displayed in the client application.
 title: Example title
 
@@ -36,10 +48,6 @@ custom_headers:
   # header1: value1
   # header2: value2
 
-# ttl is a subscription time to live (in seconds).
-# zero is unlimited subscription and 86400 is hours to live.
-ttl: 0
-
 # bodies is an array of subscription entries containing
 # protocol-specific and user-specific settings.
 bodies:
@@ -47,3 +55,7 @@ bodies:
     vless://some_user_uuid@some_ip:some_port?some_flag=some_flag_value...
   - |
     hysteria2://some_user%some_user_uuid@some_ip:some_port?flags...
+
+# metadata is a specific data for other api that stored in json format.
+# metadata: |
+#     {"key1": "value2", "key2": "value2"}

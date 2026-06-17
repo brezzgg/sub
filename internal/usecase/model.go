@@ -161,6 +161,34 @@ func (r *SetRequest) ToSubscription() (string, *entity.Subscription, error) {
 	// dns
 	sub.Payload.Headers["DNS"] = r.GetDns()
 
+	// user info
+	userInfoRes := ""
+	userInfoAddRes := func(k string, v int64) {
+		userInfoRes += fmt.Sprintf(" %s=%d;", k, v)
+	}
+	userInfoIntExp := false
+	if sub.Expired.Year() > 2000 {
+		userInfoAddRes("expire", sub.Expired.Unix())
+		userInfoIntExp = true
+	}
+	if ui := r.GetUserInfo(); ui != nil {
+		if i := ui.GetDownload(); i != 0 {
+			userInfoAddRes("download", i)
+		}
+		if i := ui.GetUpload(); i != 0 {
+			userInfoAddRes("upload", i)
+		}
+		if i := ui.GetTotal(); i != 0 {
+			userInfoAddRes("total", i)
+		}
+		if i := ui.GetExpired(); i != 0 && !userInfoIntExp {
+			userInfoAddRes("expire", i)
+		}
+	}
+	if userInfoRes != "" {
+		sub.Payload.Headers["Subscription-Userinfo"] = strings.Trim(userInfoRes, " ;")
+	}
+
 	// bodies
 	if len(sub.Payload.Body) > 0 && len(r.GetBodies()) > 0 {
 		return "", nil, fmt.Errorf("body is contained in either payload_body_string or bodies, use one of the two")

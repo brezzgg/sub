@@ -115,6 +115,7 @@ type SetRequest struct {
 	MovedPermanently string                 `protobuf:"bytes,6,opt,name=moved_permanently,json=movedPermanently,proto3" json:"moved_permanently,omitempty"`
 	SupportUri       string                 `protobuf:"bytes,7,opt,name=support_uri,json=supportUri,proto3" json:"support_uri,omitempty"`
 	Dns              string                 `protobuf:"bytes,8,opt,name=dns,proto3" json:"dns,omitempty"`
+	UserInfo         *UserInfo              `protobuf:"bytes,9,opt,name=user_info,json=userInfo,proto3" json:"user_info,omitempty"`
 	CustomHeaders    map[string]string      `protobuf:"bytes,10,rep,name=custom_headers,json=customHeaders,proto3" json:"custom_headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
@@ -206,6 +207,13 @@ func (x *SetRequest) GetDns() string {
 	return ""
 }
 
+func (x *SetRequest) GetUserInfo() *UserInfo {
+	if x != nil {
+		return x.UserInfo
+	}
+	return nil
+}
+
 func (x *SetRequest) GetCustomHeaders() map[string]string {
 	if x != nil {
 		return x.CustomHeaders
@@ -257,6 +265,74 @@ func (x *MetadataRaw) GetData() []byte {
 	return nil
 }
 
+type UserInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Upload        int64                  `protobuf:"varint,1,opt,name=upload,proto3" json:"upload,omitempty"`
+	Download      int64                  `protobuf:"varint,2,opt,name=download,proto3" json:"download,omitempty"`
+	Total         int64                  `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
+	Expired       int64                  `protobuf:"varint,4,opt,name=expired,proto3" json:"expired,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserInfo) Reset() {
+	*x = UserInfo{}
+	mi := &file_internal_usecase_model_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserInfo) ProtoMessage() {}
+
+func (x *UserInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_internal_usecase_model_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserInfo.ProtoReflect.Descriptor instead.
+func (*UserInfo) Descriptor() ([]byte, []int) {
+	return file_internal_usecase_model_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *UserInfo) GetUpload() int64 {
+	if x != nil {
+		return x.Upload
+	}
+	return 0
+}
+
+func (x *UserInfo) GetDownload() int64 {
+	if x != nil {
+		return x.Download
+	}
+	return 0
+}
+
+func (x *UserInfo) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *UserInfo) GetExpired() int64 {
+	if x != nil {
+		return x.Expired
+	}
+	return 0
+}
+
 var File_internal_usecase_model_proto protoreflect.FileDescriptor
 
 const file_internal_usecase_model_proto_rawDesc = "" +
@@ -271,7 +347,7 @@ const file_internal_usecase_model_proto_rawDesc = "" +
 	"\bmetadata\x18\x06 \x01(\v2!.sub.internal.usecase.MetadataRawR\bmetadata\x1aA\n" +
 	"\x13PayloadHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc0\x03\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xfd\x03\n" +
 	"\n" +
 	"SetRequest\x129\n" +
 	"\x03raw\x18\x01 \x01(\v2'.sub.internal.usecase.SubscriptionRawPbR\x03raw\x12\x16\n" +
@@ -282,14 +358,20 @@ const file_internal_usecase_model_proto_rawDesc = "" +
 	"\x11moved_permanently\x18\x06 \x01(\tR\x10movedPermanently\x12\x1f\n" +
 	"\vsupport_uri\x18\a \x01(\tR\n" +
 	"supportUri\x12\x10\n" +
-	"\x03dns\x18\b \x01(\tR\x03dns\x12Z\n" +
+	"\x03dns\x18\b \x01(\tR\x03dns\x12;\n" +
+	"\tuser_info\x18\t \x01(\v2\x1e.sub.internal.usecase.UserInfoR\buserInfo\x12Z\n" +
 	"\x0ecustom_headers\x18\n" +
 	" \x03(\v23.sub.internal.usecase.SetRequest.CustomHeadersEntryR\rcustomHeaders\x1a@\n" +
 	"\x12CustomHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"!\n" +
 	"\vMetadataRaw\x12\x12\n" +
-	"\x04data\x18\x01 \x01(\fR\x04dataB)Z'github.com/brezzgg/sub/internal/usecaseb\x06proto3"
+	"\x04data\x18\x01 \x01(\fR\x04data\"n\n" +
+	"\bUserInfo\x12\x16\n" +
+	"\x06upload\x18\x01 \x01(\x03R\x06upload\x12\x1a\n" +
+	"\bdownload\x18\x02 \x01(\x03R\bdownload\x12\x14\n" +
+	"\x05total\x18\x03 \x01(\x03R\x05total\x12\x18\n" +
+	"\aexpired\x18\x04 \x01(\x03R\aexpiredB)Z'github.com/brezzgg/sub/internal/usecaseb\x06proto3"
 
 var (
 	file_internal_usecase_model_proto_rawDescOnce sync.Once
@@ -303,24 +385,26 @@ func file_internal_usecase_model_proto_rawDescGZIP() []byte {
 	return file_internal_usecase_model_proto_rawDescData
 }
 
-var file_internal_usecase_model_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_internal_usecase_model_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_internal_usecase_model_proto_goTypes = []any{
 	(*SubscriptionRawPb)(nil), // 0: sub.internal.usecase.SubscriptionRawPb
 	(*SetRequest)(nil),        // 1: sub.internal.usecase.SetRequest
 	(*MetadataRaw)(nil),       // 2: sub.internal.usecase.MetadataRaw
-	nil,                       // 3: sub.internal.usecase.SubscriptionRawPb.PayloadHeadersEntry
-	nil,                       // 4: sub.internal.usecase.SetRequest.CustomHeadersEntry
+	(*UserInfo)(nil),          // 3: sub.internal.usecase.UserInfo
+	nil,                       // 4: sub.internal.usecase.SubscriptionRawPb.PayloadHeadersEntry
+	nil,                       // 5: sub.internal.usecase.SetRequest.CustomHeadersEntry
 }
 var file_internal_usecase_model_proto_depIdxs = []int32{
-	3, // 0: sub.internal.usecase.SubscriptionRawPb.payload_headers:type_name -> sub.internal.usecase.SubscriptionRawPb.PayloadHeadersEntry
+	4, // 0: sub.internal.usecase.SubscriptionRawPb.payload_headers:type_name -> sub.internal.usecase.SubscriptionRawPb.PayloadHeadersEntry
 	2, // 1: sub.internal.usecase.SubscriptionRawPb.metadata:type_name -> sub.internal.usecase.MetadataRaw
 	0, // 2: sub.internal.usecase.SetRequest.raw:type_name -> sub.internal.usecase.SubscriptionRawPb
-	4, // 3: sub.internal.usecase.SetRequest.custom_headers:type_name -> sub.internal.usecase.SetRequest.CustomHeadersEntry
-	4, // [4:4] is the sub-list for method output_type
-	4, // [4:4] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	3, // 3: sub.internal.usecase.SetRequest.user_info:type_name -> sub.internal.usecase.UserInfo
+	5, // 4: sub.internal.usecase.SetRequest.custom_headers:type_name -> sub.internal.usecase.SetRequest.CustomHeadersEntry
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_internal_usecase_model_proto_init() }
@@ -334,7 +418,7 @@ func file_internal_usecase_model_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_internal_usecase_model_proto_rawDesc), len(file_internal_usecase_model_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

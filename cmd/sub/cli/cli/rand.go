@@ -12,7 +12,7 @@ var randidCmd = &cobra.Command{
 	Use:   "rand_id",
 	Short: "Generate random subscription id",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Print(randIdFunc())
+		log.Print("%s", randIdFunc())
 	},
 }
 

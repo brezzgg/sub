@@ -119,13 +119,13 @@ func (u *Usecase) GetPayload(id string) (*entity.Payload, error) {
 	if len(re.Payload.Body) == 0 && len(re.Payload.Headers) == 0 {
 		for _, fn := range u.nilPayloadFuncs {
 			if err := fn(re.Payload, id, re); err != nil {
-				return nil, errors.Errorf(errors.CodeInternal, "nil payload func error", err)
+				return nil, errors.Errorf(errors.CodeInternal, "nil payload func error: %s", err)
 			}
 		}
 	}
 	for _, fn := range u.payloadFuncs {
 		if err := fn(re.Payload, id, re); err != nil {
-			return nil, errors.Errorf(errors.CodeInternal, "payload func error", err)
+			return nil, errors.Errorf(errors.CodeInternal, "payload func error: %s", err)
 		}
 	}
 	re.Payload.Normalize()

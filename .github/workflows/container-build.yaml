@@ -1,7 +1,6 @@
 name: "container-build"
 on:
   push:
-    branches: ["main"]
     tags:
       - "v*"
 
@@ -40,8 +39,6 @@ jobs:
           images: ghcr.io/brezzgg/sub
           tags: |
             type=ref,event=tag
-            type=sha,format=short
-            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build & push container
         uses: docker/build-push-action@v6

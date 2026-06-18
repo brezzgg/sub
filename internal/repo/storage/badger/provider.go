@@ -25,7 +25,10 @@ func Constructor(options map[string]any) (repo.StorageProvider, error) {
 		*file = ".db"
 	}
 
-	db, err := badger.Open(badger.DefaultOptions(*file))
+	opts := badger.DefaultOptions(*file)
+	opts.Logger = &Logger{}
+
+	db, err := badger.Open(opts)
 	if err != nil {
 		return nil, fmt.Errorf("database error: %s", err)
 	}

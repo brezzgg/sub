@@ -2,6 +2,8 @@ name: "container-build"
 on:
   push:
     branches: ["main"]
+    tags:
+      - "v*"
 
 permissions:
   contents: read
@@ -31,9 +33,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/brezzgg/sub
+          tags: |
+            type=ref,event=tag
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Build & push container
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ghcr.io/brezzgg/sub:latest
+          tags: ${{ steps.meta.outputs.tags }}
